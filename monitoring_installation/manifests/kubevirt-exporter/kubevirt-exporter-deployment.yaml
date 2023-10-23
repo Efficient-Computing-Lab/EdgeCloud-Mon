@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubevirt-exporter
+  name: kubevirt-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: kubevirt-exporter
+  template:
+    metadata:
+      labels:
+        app: kubevirt-exporter
+    spec:
+      containers:
+      - env:
+        - name: IP
+          value: 192.168.1.3
+        image: gkorod/kubevirt_exporter:v1.0
+        imagePullPolicy: IfNotPresent
+        name: kubevirt-exporter
+        ports:
+        - containerPort: 9999
+          name: metrics
+        volumeMounts:
+        - mountPath: /root/
+          name: config
+      imagePullSecrets:
+      - name: kubevirt-exporter-secret
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+        monitoringMaster: 'true'
+      volumes:
+      - hostPath:
+          path: /home/giannis/EdgeCloud-Mon/monitoring_installation/config
+          type: Directory
+        name: config

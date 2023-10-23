@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitorable-vm-kubevirt
+  namespace: monitoring
+  labels:
+    team: frontend
+spec:
+  selector:
+    matchLabels:
+      app: kubevirt-exporter-service
+  namespaceSelector:
+    any: true
+  endpoints:
+    - port: metrics
+      interval: 60s

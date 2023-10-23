@@ -1,0 +1,66 @@
+{
+	"timestamp": 1663065257.826,
+	"minicloud_id": "",
+	"CPU Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_cpu_arch": "x86_64",
+		"node_cpu_bits": "64",
+		"node_cpu_brand": "AMD FX(tm)-6350 Six-Core Processor",
+		"node_cpu_cores": "6"
+	}],
+	"Memory Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_ram_total_bytes": "16852340736"
+	}],
+	"Disk Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_disk_total_size": "235150848000"
+	}],
+	"Battery Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_battery_plugged": "false",
+		"node_battery_percent": "0"
+	}],
+	"Location Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_city": "Glyfada",
+		"node_continent": "Europe",
+		"node_country": "Greece",
+		"node_latitude": "37.8693",
+		"node_longitude": "23.7461"
+	}],
+	"OS Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_os_name": "Linux",
+		"node_os_version": "4.15.0-191-generic"
+	}],
+	"GPU Characterization": [{
+		"node_type": "Computer",
+		"node_name": "giannis",
+		"node_uuid": "4e849968-21fc-11ed-a346-204ef6b52cc7",
+		"node_ip": "192.168.1.2",
+		"node_gpu_model": "Advanced Micro Devices, Inc. [AMD/ATI] Tobago PRO [Radeon R7 360 / R9 360 OEM] (rev 81) (prog-if 00 [VGA controller])",
+		"node_gpu_type": "Dedicated graphics processing",
+		"node_gpu_id": "1",
+		"quantity": "1"
+	}]
+
+}

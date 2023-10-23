@@ -1,0 +1,12 @@
+/monitoringapi/.idea
+/monitoring_installation/.idea
+/monitoring_installation/.kube
+/monitoring_installation/.config
+/monitoring_installation/venv
+/monitoring_installation/__pycache__
+/char_agent/__pycache__
+/kubevirt_exporter/__pycache__
+/monitoringapi/__pycache__
+/kubevirt_exporter/.idea
+/char_agent/.idea
+/.idea

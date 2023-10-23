@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitorable-vm-kubevirt
+  namespace: monitoring
+  labels:
+    app: kubevirt-exporter-service
+spec:
+  ports:
+  - name: metrics
+    targetPort: 9999
+    port: 9999
+  selector:
+    app: kubevirt-exporter

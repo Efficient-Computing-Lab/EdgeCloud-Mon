@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: char-agent
+  name: char-agent
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: char-agent
+  template:
+    metadata:
+      labels:
+        app: char-agent
+    spec:
+      containers:
+      - env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: GPU_LIST
+          value: '[{''GPU_name'': ''Advanced Micro Devices, Inc. [AMD/ATI] Tobago
+            PRO [Radeon R7 360 / R9 360 OEM] (rev 81) (prog-if 00 [VGA controller])'',
+            ''id'': 1, ''quantity'': 1}]'
+        image: gkorod/char-agent:v1.0
+        imagePullPolicy: Always
+        name: char-agent
+        ports:
+        - containerPort: 5001
+          name: char-agent
+        securityContext:
+          privileged: true
+      hostNetwork: true
+      imagePullSecrets:
+      - name: charagent
