@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-loadbalancer
+  namespace: monitoring
+spec:
+  selector:
+    prometheus: k8s
+  ports:
+    - protocol: TCP
+      port: 9090   # Adjust the port as needed
+      targetPort: 9090   # Adjust the target port based on Prometheus configuration
+  type: LoadBalancer
+
