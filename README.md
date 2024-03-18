@@ -67,7 +67,7 @@ All the custom Docker Images are uploaded to Dockerhub:
 
 ## Cite Us
 
-If you use the above code for your research, please cite our papers:
+If you use the above code for your research, please cite our paper:
 
 - [EdgeCloud Mon: A lightweight monitoring stack for K3s clusters](https://www.sciencedirect.com/science/article/pii/S2352711024000463)
        
