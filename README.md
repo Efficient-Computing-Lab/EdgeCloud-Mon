@@ -64,3 +64,19 @@ All the custom Docker Images are uploaded to Dockerhub:
 * Characterization agent can be found <a href="https://hub.docker.com/repository/docker/gkorod/char-agent/general">here </a>
 * Kubervirt exporter can be found <a href="https://hub.docker.com/repository/docker/gkorod/kubevirt_exporter/general"> here </a>
 * monitoringAPI can be found <a href="https://hub.docker.com/repository/docker/gkorod/monitoringapi/general"> here </a>
+
+## Cite Us
+
+If you use the above code for your research, please cite our papers:
+
+- [EdgeCloud Mon: A lightweight monitoring stack for K3s clusters](https://www.sciencedirect.com/science/article/pii/S2352711024000463)
+       
+      @article{korontanis2024edgecloud,
+      title={EdgeCloud Mon: A lightweight monitoring stack for K3s clusters},
+      author={Korontanis, Ioannis and Makris, Antonios and Tserpes, Konstantinos},
+      journal={SoftwareX},
+      volume={26},
+      pages={101675},
+      year={2024},
+      publisher={Elsevier}
+      }
