@@ -13,7 +13,8 @@ from os import path
 import uuid
 import logging
 import ast
-
+import pandas as pd
+import time
 logging.basicConfig(level=logging.INFO)
 
 
@@ -183,7 +184,15 @@ def get_cpu():
     CPUarch = platform.machine()
     CPUbits = str(CPUinfo.get('bits'))
     CPUcores = CPUinfo.get('count')
-    cpu = {"CPU": {"model": brand, "Arch": CPUarch, "bits": CPUbits, "cores": CPUcores}}
+    home = os.getcwd()
+    items = os.listdir(home)
+    logging.info(items)
+    # Define column names
+    columns = ["Date","CPU Utilization","Total Power","CPU Power","GPU Power"]
+    # Read the CSV file with specified column names
+    df = pd.read_csv(home+'/output.csv', header=None, names=columns)
+    energy_value = df['CPU Power'].iloc[0]
+    cpu = {"CPU": {"model": brand, "Arch": CPUarch, "bits": CPUbits, "cores": CPUcores, "energy_watt": energy_value}}
     logging.info(cpu)
     return cpu
 

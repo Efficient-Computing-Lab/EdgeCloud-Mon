@@ -1,5 +1,5 @@
 import time
-
+import subprocess
 from prometheus_client import start_http_server, REGISTRY
 from prometheus_client.metrics_core import GaugeMetricFamily
 import characterization
@@ -47,7 +47,7 @@ class CustomCollector(object):
         cpu = char_node_cpu.get('CPU')
         brand = cpu.get('model')
         CPUarch = cpu.get('Arch')
-
+        CPUenergy = cpu.get('energy_watt')
         CPUbits = cpu.get('bits')
         CPUcores = cpu.get('cores')
         char_node_ram = characterization.get_ram()
@@ -89,6 +89,13 @@ class CustomCollector(object):
             [char_node_name, char_node_class, char_node_uuid, brand, CPUarch, CPUbits],
             CPUcores)
         yield cpu_metric
+        cpu_energy_metric = GaugeMetricFamily('char_node_cpu_energy_watt', 'Energy consumption of CPU in Watt.',
+                                       labels=['char_node_name', 'char_node_class', 'char_node_uuid', 'char_node_brand',
+                                               'char_node_arch', 'char_node_bits'])
+        cpu_energy_metric.add_metric(
+            [char_node_name, char_node_class, char_node_uuid, brand, CPUarch, CPUbits],
+            CPUenergy)
+        yield cpu_energy_metric
         # metric4
         location_metric = GaugeMetricFamily('char_node_location', 'Location of a device.',
                                             labels=['char_node_name', 'char_node_class', 'char_node_uuid',
@@ -146,6 +153,14 @@ class CustomCollector(object):
 
 if __name__ == '__main__':
     start_http_server(5001)
+    # Define the path to your shell script
+    home = os.getcwd()
+    script_path = home+'/run-powerjoular.sh'
+    # Run the shell script
+    subprocess.run([script_path], shell=True)
+    while not os.path.exists(home+'/output.csv'):
+        # Wait for a short time before checking again
+        time.sleep(1)
     REGISTRY.register(CustomCollector())
     while True:
         time.sleep(5)

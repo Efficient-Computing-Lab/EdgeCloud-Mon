@@ -1,0 +1,1 @@
+powerjoular -o output.csv &
