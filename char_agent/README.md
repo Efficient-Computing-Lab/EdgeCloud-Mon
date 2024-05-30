@@ -12,6 +12,8 @@ operating system and report it to Prometheus along with its version.
 Among its most noteworthy features is its ability to determine
 whether a device includes a battery or contains a GPU.
 
+The CPU energy consumption metric is only present in v1.1 and is being retrieved by [Powerjoular](https://github.com/joular/powerjoular)
+
 ![alt text](Characterization%20agent.png)
 ## Build image
 
