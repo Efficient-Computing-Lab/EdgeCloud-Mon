@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 
-def characterization_agent(gpu_list):
+def characterization_agent(gpu_list,device_model=None):
     kubernetes = {
         "apiVersion": "apps/v1",
         "kind": "DaemonSet",
@@ -31,7 +31,7 @@ def characterization_agent(gpu_list):
                     "containers": [
                         {
                             "name": "char-agent",
-                            "image": "gkorod/char-agent:v1.0",
+                            "image": "gkorod/char-agent:v1.2",
                             "imagePullPolicy": "Always",
                             "securityContext": {
                                 "privileged": True
@@ -45,7 +45,8 @@ def characterization_agent(gpu_list):
                                         }
                                     }
                                 },
-                                {"name": "GPU_LIST", "value": str(gpu_list)}
+                                {"name": "GPU_LIST", "value": str(gpu_list)},
+                                {"name": "DEVICE_MODEL", "value": device_model}
                             ],
                             "ports": [
                                 {

@@ -21,9 +21,12 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: GPU_LIST
-          value: '[{''GPU_name'': ''Device 1234:1111 (rev 02) (prog-if 00 [VGA controller])'',
-            ''id'': 1, ''quantity'': 1}]'
-        image: gkorod/char-agent:v1.0
+          value: '[{''GPU_name'': ''NVIDIA Corporation AD107M [GeForce RTX 4050 Max-Q
+            / Mobile] (rev a1) (prog-if 00 [VGA controller])'', ''id'': 1, ''quantity'':
+            1}]'
+        - name: DEVICE_MODEL
+          value: Lenovo LOQ 15ARP9
+        image: gkorod/char-agent:v1.2
         imagePullPolicy: Always
         name: char-agent
         ports:

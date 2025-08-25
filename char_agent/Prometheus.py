@@ -6,6 +6,8 @@ import characterization
 import os
 import logging
 
+
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -55,6 +57,7 @@ class CustomCollector(object):
         char_os = char_node_os.get('OS')
         os_name = char_os.get('OS_name')
         os_version = char_os.get('OS_version')
+        device_model = characterization.device_model(CPUarch)
         if 'arm' in CPUarch:
             char_node_class = 'RPi'
         if 'with' in brand or 'arm' in CPUarch:
@@ -66,6 +69,14 @@ class CustomCollector(object):
             label_plugged = 'true'
         if not plugged:
             label_plugged = 'false'
+
+        device_model_metric = GaugeMetricFamily('char_node_device_model', 'Device model', labels=['char_node_name','char_node_class','char_node_uuid','char_node_device_model_name'])
+        if device_model:
+            device_model_metric.add_metric([char_node_name, char_node_class, char_node_uuid, device_model], 1)
+        else:
+            device_model_metric.add_metric([char_node_name, char_node_class, char_node_uuid, device_model], 0)
+        yield device_model_metric
+
         battery_metric = GaugeMetricFamily('char_node_battery', 'Battery percentage of the device',
                                            labels=['char_node_name', 'char_node_class', 'char_node_uuid',
                                                    'char_node_plugged_battery'])

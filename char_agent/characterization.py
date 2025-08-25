@@ -8,7 +8,7 @@ import re
 import os
 from urllib.request import urlopen
 import json
-from ipify import get_ip
+import requests
 from os import path
 import uuid
 import logging
@@ -17,6 +17,37 @@ import pandas as pd
 import time
 logging.basicConfig(level=logging.INFO)
 
+chipset_list = [{"model": "Raspberry Pi Pico", "chipset": "RP2040", "id": 1, "GPU_name": "not available"},
+                {"model": "Raspberry Pi 1 Model A", "chipset": "BCM2835", "GPU_name": "VideoCore IV @ 250 MHz",
+                 "id": 1},
+                {"model": "Raspberry Pi 3 Model A+", "chipset": "BCM2837B0",
+                 "GPU_name": "VideoCore IV @ 250 MHz", "id": 1
+                 },
+                {"model": "Raspberry Pi 1 Model B", "chipset": "BCM2835", "GPU_name": "VideoCore IV @ 250 MHz",
+                 "id": 1},
+                {"model": "Raspberry Pi 2 Model B", "chipset": "BCM2836", "GPU_name": "VideoCore IV @ 250 MHz",
+                 "id": 1},
+                {"model": "Raspberry Pi 2 Model B v1.2", "chipset": "BCM2837",
+                 "GPU_name": "VideoCore IV @ 250 MHz", "id": 1
+                 },
+                {"model": "Raspberry Pi 3 Model B", "chipset": "BCM2837", "GPU_name": "VideoCore IV @ 250 MHz",
+                 "id": 1, },
+                {"model": "Raspberry Pi 3 Model B+", "chipset": "BCM2837B0",
+                 "GPU_name": "VideoCore IV @ 300 MHz", "id": 1
+                 },
+                {"model": "Raspberry Pi 4 Model B", "chipset": "BCM2711", "GPU_name": "VideoCore VI @ 500 MHz",
+                 "id": 1},
+                {"model": "Raspberry Pi Zero PCB v1.2", "chipset": "BCM2835",
+                 "GPU_name": "VideoCore IV @ 300 MHz", "id": 1
+                 },
+                {"model": "Raspberry Pi Zero PCB v1.3", "chipset": "BCM2835",
+                 "GPU_name": "VideoCore IV @ 300 MHz", "id": 1},
+                {"model": "Raspberry Pi Zero W", "chipset": "BCM2835", "GPU_name": "VideoCore IV @ 300 MHz",
+                 "id": 1},
+                {"model": "Raspberry Pi Zero 2 W", "chipset": "BCM2710A1", "GPU_name": "VideoCore IV @ 300 MHz",
+                 "id": 1},
+                {"model": "Raspberry Pi 400", "chipset": "BCM2711C0", "GPU_name": "VideoCore IV @ 500 MHz",
+                 "id": 1}]
 
 def generate_uuid():
     uuid1 = uuid.uuid1()
@@ -41,7 +72,7 @@ def generate_uuid():
 
 
 def get_location():
-    ip = get_ip()
+    ip = requests.get("https://api.ipify.org").text
     data = {}
     url = 'http://ip-api.com/json/' + str(ip)
     try:
@@ -95,6 +126,29 @@ def get_host_type():
     return node_class
 
 
+def device_model(arch):
+    if "arm" in arch:
+        model_info = subprocess.Popen(["cat /proc/cpuinfo | grep -w Model"], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        if model_info == "":
+            model_info = subprocess.Popen(["cat /proc/device-tree/model"], shell=True, stdout=subprocess.PIPE,
+                                          stderr=subprocess.STDOUT)
+        out, err = model_info.communicate()
+        model = out.decode('utf8')
+        if "Raspberry Pi" in model:
+            model = model.replace("Model		:", "")
+            if "Rev" in model:
+                model = model.replace("Rev", "")
+                model = model.replace(".", "")
+                model = re.sub(r" ?\d+$", "", model)
+            model_info.terminate()
+        if "Jetson" in model:
+            if "Developer Kit" in model:
+                model = model.replace("Developer Kit","")
+    if "arm" not in arch:
+        model = os.getenv("DEVICE_MODEL")
+    print(model)
+    return model
+
 def get_gpu_model(arch):
     gpu_list = []
     found = False
@@ -119,47 +173,9 @@ def get_gpu_model(arch):
                                     stderr=subprocess.STDOUT)
         out, err = gpu_info.communicate()
         chipset = out.decode('utf8')
-        model_info = subprocess.Popen(["cat /proc/cpuinfo | grep -w Model"], shell=True, stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT)
-        out, err = model_info.communicate()
-        model = out.decode('utf8')
         chipset = chipset.replace("Hardware	:", "")
-        model = model.replace("Model		:", "")
-        if "Rev" in model:
-            model = model.replace("Rev", "")
-            model = model.replace(".", "")
-            model = re.sub(r" ?\d+$", "", model)
-        chipset_list = [{"model": "Raspberry Pi Pico", "chipset": "RP2040", "id": 1, "GPU_name": "not available"},
-                        {"model": "Raspberry Pi 1 Model A", "chipset": "BCM2835", "GPU_name": "VideoCore IV @ 250 MHz",
-                         "id": 1},
-                        {"model": "Raspberry Pi 3 Model A+", "chipset": "BCM2837B0",
-                         "GPU_name": "VideoCore IV @ 250 MHz", "id": 1
-                         },
-                        {"model": "Raspberry Pi 1 Model B", "chipset": "BCM2835", "GPU_name": "VideoCore IV @ 250 MHz",
-                         "id": 1},
-                        {"model": "Raspberry Pi 2 Model B", "chipset": "BCM2836", "GPU_name": "VideoCore IV @ 250 MHz",
-                         "id": 1},
-                        {"model": "Raspberry Pi 2 Model B v1.2", "chipset": "BCM2837",
-                         "GPU_name": "VideoCore IV @ 250 MHz", "id": 1
-                         },
-                        {"model": "Raspberry Pi 3 Model B", "chipset": "BCM2837", "GPU_name": "VideoCore IV @ 250 MHz",
-                         "id": 1, },
-                        {"model": "Raspberry Pi 3 Model B+", "chipset": "BCM2837B0",
-                         "GPU_name": "VideoCore IV @ 300 MHz", "id": 1
-                         },
-                        {"model": "Raspberry Pi 4 Model B", "chipset": "BCM2711", "GPU_name": "VideoCore VI @ 500 MHz",
-                         "id": 1},
-                        {"model": "Raspberry Pi Zero PCB v1.2", "chipset": "BCM2835",
-                         "GPU_name": "VideoCore IV @ 300 MHz", "id": 1
-                         },
-                        {"model": "Raspberry Pi Zero PCB v1.3", "chipset": "BCM2835",
-                         "GPU_name": "VideoCore IV @ 300 MHz", "id": 1},
-                        {"model": "Raspberry Pi Zero W", "chipset": "BCM2835", "GPU_name": "VideoCore IV @ 300 MHz",
-                         "id": 1},
-                        {"model": "Raspberry Pi Zero 2 W", "chipset": "BCM2710A1", "GPU_name": "VideoCore IV @ 300 MHz",
-                         "id": 1},
-                        {"model": "Raspberry Pi 400", "chipset": "BCM2711C0", "GPU_name": "VideoCore IV @ 500 MHz",
-                         "id": 1}]
+        gpu_info.terminate()
+        model = device_model(arch)
         for device in chipset_list:
             if device.get("model") in model.strip() and device.get("chipset") in chipset.strip():
                 found = True
@@ -168,8 +184,6 @@ def get_gpu_model(arch):
                 del device_to_remove_model['chipset']
                 device_to_remove_model["quantity"] = 1
                 gpu_list.append(device_to_remove_model)
-        gpu_info.terminate()
-        model_info.terminate()
     if found:
         result = {"GPU_list": gpu_list}
     else:

@@ -1,4 +1,4 @@
-FROM python:3.6.9-slim
+FROM python:3.11-slim-bullseye
 
 # Create and set the working directory
 RUN mkdir /characterization-agent
@@ -15,14 +15,15 @@ RUN apt-get update && apt-get install -y \
     gnat \
     sudo \
     gprbuild \
-    git
+    git \
+    systemd
 
 # Install Python dependencies
 RUN pip3 install \
     py-cpuinfo \
-    ipify \
     prometheus-client \
     psutil \
+    requests \
     pandas
 
 # Clone the powerjoular repository and run the installer
@@ -33,7 +34,7 @@ RUN cd powerjoular/installer && ./install-powerjoular.sh
 
 
 # Set environment variable
-ENV DISPLAY :0.0
+ENV DISPLAY=:0.0
 
 # Expose the necessary port
 EXPOSE 5001
