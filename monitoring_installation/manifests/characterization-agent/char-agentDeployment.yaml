@@ -32,7 +32,7 @@ spec:
           volumeMounts:
             - name: env-file
               mountPath: /characterization-agent/.env
-              subPath: .env
+              readOnly: true
       volumes:
         - name: env-file
           hostPath:
