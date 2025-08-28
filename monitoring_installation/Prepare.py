@@ -1,9 +1,7 @@
 import json
 import os
 import subprocess
-import string
-from pathlib import Path
-import secrets
+
 
 cwd = os.getcwd()
 
@@ -22,7 +20,8 @@ def create_storage_path(home):
         os.chdir(cwd)
         subprocess.call(['chmod +x prometheus-pv.sh'], shell=True)
         subprocess.call(['sh', './prometheus-pv.sh', str(home)])
-        YAMLwriter.pv(home + '/Prometheus/prometheus/', name, cwd)
+        subprocess.call(['kubectl apply -f prometheus-volume.yaml'], shell=True)
+
 
 
 def add_label():

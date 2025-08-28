@@ -229,18 +229,7 @@ def prometheus_kubeControllerScheduler_DiscoveryEndpoints(ip):
         yaml.dump(kubernetes, outfile, default_flow_style=False)
 
 
-def pv(path, name, cwd):
-    write_path = cwd + '/' + name + '-volume.yaml'
-    kubernetes = {'apiVersion': 'v1',
-                  'kind': 'PersistentVolume',
-                  'metadata': {'name': name + '-pv-volume', 'labels': {'type': 'local'}},
-                  'spec': {'storageClassName': 'local-path', 'capacity': {'storage': '10Gi'},
-                           'accessModes': ['ReadWriteOnce'],
-                           'persistentVolumeReclaimPolicy': 'Retain',
-                           'hostPath': {'path': path}}}
 
-    with open(write_path, 'w') as outfile:
-        yaml.dump(kubernetes, outfile, default_flow_style=False)
 
 
 def prometheus_ingress(ip):
