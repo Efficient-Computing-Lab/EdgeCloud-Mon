@@ -24,6 +24,7 @@ RUN pip3 install \
     prometheus-client \
     psutil \
     requests \
+    python-dotenv \
     pandas
 
 # Clone the powerjoular repository and run the installer

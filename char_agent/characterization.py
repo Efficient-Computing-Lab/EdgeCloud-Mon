@@ -14,6 +14,8 @@ import uuid
 import logging
 import ast
 import pandas as pd
+from dotenv import load_dotenv
+load_dotenv("/characterization-agent/.env")
 import time
 logging.basicConfig(level=logging.INFO)
 
