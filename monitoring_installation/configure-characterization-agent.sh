@@ -1,39 +1,93 @@
 #!/bin/bash
 
-set -e  # exit on error
+# A helper function to get GPU information, mimicking the Python `info()` function.
+function get_gpu_info() {
+    local gpu_list=""
+    local -a gpu_array=()
+    local -A gpu_counts
 
-# 1️⃣ Define function to store char-agent envs
-store_char_agent_envs() {
+    # Use lspci to find VGA controllers and parse their names.
+    # The 'head -n 1' is used because some GPUs show up multiple times in the output.
+    while read -r line; do
+        if [[ "$line" =~ "VGA compatible controller:" ]]; then
+            # Extract the GPU name after the colon.
+            gpu_name=$(echo "$line" | sed -E 's/.*VGA compatible controller: (.*)/\1/' | xargs)
+            if [[ -n "$gpu_name" ]]; then
+                gpu_array+=("$gpu_name")
+            fi
+        fi
+    done < <(lspci -v)
+
+    # Count the occurrences of each unique GPU name.
+    for gpu in "${gpu_array[@]}"; do
+        ((gpu_counts["$gpu"]++))
+    done
+
+    # Create the JSON-like string for the GPU list, which is a key part of the original script.
+    local id=0
+    for gpu_name in "${!gpu_counts[@]}"; do
+        ((id++))
+        local count=${gpu_counts["$gpu_name"]}
+        # Format the output as a JSON array of objects.
+        if [[ -n "$gpu_list" ]]; then
+            gpu_list+=","
+        fi
+        gpu_list+="{\"GPU_name\":\"$gpu_name\",\"id\":$id,\"quantity\":$count}"
+    done
+
+    echo "[$gpu_list]"
+}
+
+# The function to store environment variables, mimicking `store_char_agent_envs()`.
+function store_char_agent_envs() {
     local gpu_list="$1"
     local path="/opt/char-agent"
-    local env_file="$path/.env"
+    local env_file="/opt/char-agent/.env"
 
-    # Create directory if it doesn't exist
     mkdir -p "$path"
     echo "Directory $path is ready."
 
-    # Get hardware vendor and model
-    vendor=$(hostnamectl | grep -w 'Hardware Vendor' | awk -F: '{print $2}' | xargs)
-    model=$(hostnamectl | grep -w 'Hardware Model' | awk -F: '{print $2}' | xargs)
+    local vendor_info=$(hostnamectl | grep -w 'Hardware Vendor')
+    local model_info=$(hostnamectl | grep -w 'Hardware Model')
 
-    if [[ -n "$vendor" && -n "$model" ]]; then
-        device_model="$vendor $model"
-        echo "$device_model"
-        # Write .env file
+    if [[ -n "$vendor_info" && -n "$model_info" ]]; then
+        # Extract vendor and model using 'awk' for a cleaner approach.
+        local vendor=$(echo "$vendor_info" | awk -F ': ' '{print $2}' | xargs)
+        local model_name=$(echo "$model_info" | awk -F ': ' '{print $2}' | xargs)
+        local device_model="$vendor $model_name"
+
+        echo "DEVICE_MODEL=$device_model"
         echo "DEVICE_MODEL=$device_model" > "$env_file"
         echo "GPU_LIST=$gpu_list" >> "$env_file"
     fi
 }
 
-# 2️⃣ Find architecture from nodeInfo.json
-arch=$(jq -r '.architecture' nodeInfo.json)
+# The function to find the system architecture, mimicking `find_architecture()`.
+function find_architecture() {
+    local arch=""
+    if [[ -f "nodeInfo.json" ]]; then
+        # Use 'grep' and 'cut' or 'jq' to parse the JSON file.
+        # This assumes 'jq' is installed for reliable JSON parsing.
+        if command -v jq &> /dev/null; then
+            arch=$(jq -r '.architecture' nodeInfo.json)
+        else
+            # Fallback for systems without 'jq'.
+            arch=$(grep -o '"architecture": *"[^"]*"' nodeInfo.json | cut -d'"' -f4)
+        fi
+    fi
+    echo "$arch"
+}
+
+# --- Main script execution ---
+
+# Call the function to find the system architecture.
+arch=$(find_architecture)
 echo "$arch"
 
-# 3️⃣ Get GPU info
-# You need a script or command to get GPU info; assuming GPU.sh exists:
-gpu_list=$(sh ./gpu.sh)
+# Call the function to get the GPU information.
+gpu_list=$(get_gpu_info)
 
-# 4️⃣ Conditionally store envs
+# Check the architecture and proceed if it's x86_64 or amd64.
 if [[ "$arch" == "x86_64" || "$arch" == "amd64" ]]; then
     store_char_agent_envs "$gpu_list"
 fi
