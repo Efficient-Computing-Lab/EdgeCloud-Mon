@@ -15,7 +15,7 @@ python3 Configs.py
 
 For the configuration of the characterization agents the following script should run on every node of the cluster:
 ```bash
-python3 configure-characterization-agent.py
+sudo python3 configure-characterization-agent.py
 ```
 After that on the master node run the following commands:
 ```bash

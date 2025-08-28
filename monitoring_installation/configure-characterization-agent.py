@@ -1,10 +1,14 @@
 import json
 import subprocess
 from pathlib import Path
+import os
 import GPU
 
 
 def store_char_agent_envs(gpu_list):
+    path = "/opt/char-agent"
+    os.makedirs(path, exist_ok=True)
+    print(f"Directory {path} is ready.")
     env_file = "/opt/char-agent/.env"
     vendor_info = subprocess.Popen(["hostnamectl | grep -w 'Hardware Vendor'"], shell=True, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
@@ -21,7 +25,7 @@ def store_char_agent_envs(gpu_list):
             model = vendor.strip() +" "+ model.strip()
             print(model)
             env_path = Path(env_file)
-            with env_path.open("a") as f:
+            with env_path.open("w") as f:
                 if vendor or model:
                     f.write(f"DEVICE_MODEL={model}\n")
                     f.write(f"GPU_LIST={gpu_list}\n")
@@ -33,6 +37,7 @@ def find_architecture():
     return arch
 
 arch = find_architecture()
+print(arch)
 gpu_list = GPU.info()
-if arch == "x86_64":
+if arch == "x86_64" or arch =="amd64":
     store_char_agent_envs(gpu_list)
