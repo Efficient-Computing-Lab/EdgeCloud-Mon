@@ -37,7 +37,7 @@ conda config --set channel_priority strict
 
 # Create a conda environment with Python 3.11
 echo "Creating Conda environment with Python 3.11..."
-conda create --name profiling python=3.11 -y
+conda create --name monitoring-installation python=3.11 -y
 
 # Activate the environment
 echo "Activating the conda environment 'monitoring-installation'..."
