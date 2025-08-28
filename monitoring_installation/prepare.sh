@@ -1,5 +1,5 @@
 #!/bin/bash
-
+apt install -y jq
 set -e  # exit on error
 
 cwd=$(pwd)
