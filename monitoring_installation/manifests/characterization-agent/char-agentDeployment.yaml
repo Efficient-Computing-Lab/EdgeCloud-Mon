@@ -31,12 +31,12 @@ spec:
               name: char-agent
           volumeMounts:
             - name: env-file
-              mountPath: /app/.env
+              mountPath: /characterization-agent/.env
               subPath: .env
       volumes:
         - name: env-file
           hostPath:
-            path: /etc/char-agent/.env   # path to .env on each node
+            path: /opt/char-agent/.env   # path to .env on each node
             type: File
       imagePullSecrets:
         - name: charagent
