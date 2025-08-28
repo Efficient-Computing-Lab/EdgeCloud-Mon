@@ -1,12 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: char-agent
   namespace: monitoring
   labels:
     app: char-agent
 spec:
-  replicas: 1 # A Deployment requires a 'replicas' field.
   selector:
     matchLabels:
       app: char-agent
@@ -37,7 +36,7 @@ spec:
       volumes:
         - name: env-file
           hostPath:
-            path: /opt/char-agent/.env
+            path: /opt/char-agent/.env   # path to .env on each node
             type: File
       imagePullSecrets:
         - name: charagent
