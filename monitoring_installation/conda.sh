@@ -40,8 +40,8 @@ echo "Creating Conda environment with Python 3.11..."
 conda create --name profiling python=3.11 -y
 
 # Activate the environment
-echo "Activating the conda environment 'profiling'..."
-conda activate profiling
+echo "Activating the conda environment 'monitoring-installation'..."
+conda activate monitoring-installation
 
 # Install dependencies from the appropriate requirements.txt
 echo "Installing dependencies from $REQUIREMENTS_FILE..."
