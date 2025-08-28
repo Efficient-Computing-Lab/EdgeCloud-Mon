@@ -17,9 +17,5 @@ For the configuration of the characterization agents the following script should
 ```bash
 sudo python3 configure-characterization-agent.py
 ```
-After that on the master node run the following commands:
-```bash
-kubectl apply -f manifests/characterization-agent
-kubectl wait -n monitoring --for=condition=ready --timeout=60s pod -l app=char-agent
-```
+
 Important: Ensure that you deploy the monitoring on Linux hosts running a kernel version of 5.4.0-117-generic or later. If you plan to install the monitoring stack separately from the ACCORDION platform, make sure to select "N" when asked the question: "Is this installation taking place on the ACCORDION Platform? (Y/N)". Selecting "N" will result in the monitoringAPI not being installed in this scenario.
