@@ -14,27 +14,7 @@ import GPU
 import YAMLwriter
 import KubernetesInfo
 
-def store_char_agent_envs():
-    env_file = "../char_agent/.env"
-    vendor_info = subprocess.Popen(["hostnamectl | grep -w 'Hardware Vendor'"], shell=True, stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT)
-    vend_out, vend_err = vendor_info.communicate()
-    vendor = vend_out.decode('utf8')
-    model_info = subprocess.Popen(["hostnamectl | grep -w 'Hardware Model'"], shell=True, stdout=subprocess.PIPE,
-                                  stderr=subprocess.STDOUT)
-    model_out, model_err = model_info.communicate()
-    model = model_out.decode('utf8')
-    if vendor or model:
-        if "Hardware Vendor" in vendor and "Hardware Model" in model:
-            vendor = vendor.replace("Hardware Vendor:", "")
-            model = model.replace("Hardware Model:", "")
-            model = vendor.strip() +" "+ model.strip()
-            print(model)
-            #env_path = Path(env_file)
-            #with env_path.open("a") as f:
-            #    if vendor or model:
-            #        f.write(f"DEVICE_MODEL={model}\n")
-    return model
+
 def find_arch():
     arch = subprocess.Popen(["uname -m"], shell=True, stdout=subprocess.PIPE,
                                   stderr=subprocess.STDOUT)
@@ -108,19 +88,9 @@ if answer1:
     subprocess.call(['sh', './kubectl.sh'])
 
     subprocess.call(['sh', './get_k3s.sh'])
-    gpu_list = GPU.info()
-    print(str(gpu_list))
+
 
     arch = find_arch()
-    print(arch)
-    if arch == "x86_64":
-        model = store_char_agent_envs()
-        YAMLwriter.characterization_agent(gpu_list,model)
-    else:
-        YAMLwriter.characterization_agent(gpu_list)
-    subprocess.call(['kubectl apply -f manifests/characterization-agent'], shell=True)
-    subprocess.call(['kubectl wait -n monitoring --for=condition=ready --timeout=60s pod -l app=char-agent'],
-                    shell=True)
     subprocess.call(['kubectl apply -f manifests/kube-state-metrics'],shell=True)
     subprocess.call(['kubectl apply -f manifests/node-exporter'],shell=True)
     kubevirt_answer = kubevirt_question()

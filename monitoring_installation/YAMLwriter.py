@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 
-def characterization_agent(gpu_list,device_model=None):
+def characterization_agent(gpu_list, env_host_path="/opt/char-agent/.env"):
     kubernetes = {
         "apiVersion": "apps/v1",
         "kind": "DaemonSet",
@@ -46,14 +46,30 @@ def characterization_agent(gpu_list,device_model=None):
                                     }
                                 },
                                 {"name": "GPU_LIST", "value": str(gpu_list)},
-                                {"name": "DEVICE_MODEL", "value": device_model}
+                                # The container will read DEVICE_MODEL from the mounted .env file
                             ],
                             "ports": [
                                 {
                                     "containerPort": 5001,
                                     "name": "char-agent"
                                 }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "name": "env-file",
+                                    "mountPath": "/app/.env",  # where it appears inside the container
+                                    "subPath": ".env"
+                                }
                             ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "env-file",
+                            "hostPath": {
+                                "path": env_host_path,   # absolute path on the host
+                                "type": "File"
+                            }
                         }
                     ],
                     "imagePullSecrets": [
@@ -65,8 +81,10 @@ def characterization_agent(gpu_list,device_model=None):
             }
         }
     }
-    with open('manifests/characterization-agent/char-agentDeployment.yaml', 'w') as outfile:
+
+    with open('manifests/characterization-agent/char-agentDaemonSet.yaml', 'w') as outfile:
         yaml.dump(kubernetes, outfile, default_flow_style=False)
+
 
 
 def monitoring_api(echoserver_ip, rid_ip, prometheus_ip, master_ip, minicloud_id):

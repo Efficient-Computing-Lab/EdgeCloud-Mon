@@ -58,8 +58,8 @@ class CustomCollector(object):
         os_name = char_os.get('OS_name')
         os_version = char_os.get('OS_version')
         device_model = characterization.device_model(CPUarch)
-        if 'arm' in CPUarch:
-            char_node_class = 'RPi'
+        #if 'arm' in CPUarch:
+        #    char_node_class = 'RPi'
         if 'with' in brand or 'arm' in CPUarch:
             dedicatedGPU = 'Integrated graphics processing'
         else:
