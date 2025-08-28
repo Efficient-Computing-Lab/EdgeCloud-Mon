@@ -4,10 +4,8 @@ set -e  # exit on error
 
 cwd=$(pwd)
 
-# 1️⃣ Install pip and run helper scripts
-sudo apt -y install python3-pip
-sh ./pip3.sh
-sh ./gpu.sh
+
+update-pciids
 
 # 2️⃣ Create Prometheus storage path and apply PV
 create_storage_path() {
