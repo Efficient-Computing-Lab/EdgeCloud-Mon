@@ -136,6 +136,7 @@ def device_model(arch):
                                           stderr=subprocess.STDOUT)
         out, err = model_info.communicate()
         model = out.decode('utf8')
+        print(model)
         if "Raspberry Pi" in model:
             model = model.replace("Model		:", "")
             if "Rev" in model:
