@@ -92,5 +92,6 @@ if [[ "$arch" == "x86_64" || "$arch" == "amd64" ]]; then
     store_char_agent_envs "$gpu_list"
 else
     echo "Detected $arch → writing empty .env"
+    mkdir /opt/char-agent/
     touch /opt/char-agent/.env
 fi
