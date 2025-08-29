@@ -129,27 +129,7 @@ def get_host_type():
 
 
 def device_model(arch):
-    if "arm" in arch:
-        model_info = subprocess.Popen(["cat /proc/cpuinfo | grep -w Model"], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-        if model_info == "":
-            model_info = subprocess.Popen(["cat /proc/device-tree/model"], shell=True, stdout=subprocess.PIPE,
-                                          stderr=subprocess.STDOUT)
-        out, err = model_info.communicate()
-        model = out.decode('utf8')
-        print(model)
-        if "Raspberry Pi" in model:
-            model = model.replace("Model		:", "")
-            if "Rev" in model:
-                model = model.replace("Rev", "")
-                model = model.replace(".", "")
-                model = re.sub(r" ?\d+$", "", model)
-            model_info.terminate()
-        if "Jetson" in model:
-            if "Developer Kit" in model:
-                model = model.replace("Developer Kit","")
-    if "arm" not in arch:
-        model = os.getenv("DEVICE_MODEL")
-    print(model)
+    model = os.getenv("DEVICE_MODEL")
     return model
 
 def get_gpu_model(arch):
