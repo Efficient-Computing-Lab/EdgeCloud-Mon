@@ -92,7 +92,5 @@ if [[ "$arch" == "x86_64" || "$arch" == "amd64" ]]; then
     store_char_agent_envs "$gpu_list"
 else
     echo "Detected $arch → writing empty .env"
-    echo "# auto-created empty .env" > /opt/char-agent/.env
+    : > /opt/char-agent/.env
 fi
-kubectl apply -f manifests/characterization-agent
-kubectl wait -n monitoring --for=condition=ready --timeout=60s pod -l app=char-agent
