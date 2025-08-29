@@ -62,17 +62,17 @@ function store_char_agent_envs() {
           echo "GPU_LIST=$gpu_list" >> "$env_file"
       fi
     else
-        if ["$device_type" == "raspberrypi"]
-          device_model=$(grep -w "Model" /proc/cpuinfo 2>/dev/null | awk -F':' '{print $2}' | xargs)
-          device_model=${device_model//Model:/}
-          device_model=${device_model//Rev/}
-          device_model=${device_model//./}
-          device_model=$(echo "$device_model" | sed -E 's/ ?[0-9]+$//')
-        fi
-        if ["$device_type" == "jetson"]
-            device_model=$(tr -d '\0' < /proc/device-tree/model)
-            device_model=${device_model//Developer Kit/}
-        fi
+          if ["$device_type" == "raspberrypi"]
+              device_model=$(grep -w "Model" /proc/cpuinfo 2>/dev/null | awk -F':' '{print $2}' | xargs)
+              device_model=${device_model//Model:/}
+              device_model=${device_model//Rev/}
+              device_model=${device_model//./}
+              device_model=$(echo "$device_model" | sed -E 's/ ?[0-9]+$//')
+          fi
+          if ["$device_type" == "jetson"]
+              device_model=$(tr -d '\0' < /proc/device-tree/model)
+              device_model=${device_model//Developer Kit/}
+          fi
 
           echo "DEVICE_MODEL=$device_model"
           echo "DEVICE_MODEL=$device_model" > "$env_file"
