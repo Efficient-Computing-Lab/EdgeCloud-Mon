@@ -63,7 +63,6 @@ function store_char_agent_envs() {
       fi
     else
         if ["$device_type" == "raspberrypi"]
-       # Try /proc/cpuinfo first
           device_model=$(grep -w "Model" /proc/cpuinfo 2>/dev/null | awk -F':' '{print $2}' | xargs)
           device_model=${device_model//Model:/}
           device_model=${device_model//Rev/}
