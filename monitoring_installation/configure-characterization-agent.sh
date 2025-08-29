@@ -48,19 +48,19 @@ function store_char_agent_envs() {
     mkdir -p "$path"
     echo "Directory $path is ready."
     if [[ "$arch" == "x86_64" || "$arch" == "amd64" ]]; then
-      local vendor_info=$(hostnamectl | grep -w 'Hardware Vendor')
-      local model_info=$(hostnamectl | grep -w 'Hardware Model')
+          local vendor_info=$(hostnamectl | grep -w 'Hardware Vendor')
+          local model_info=$(hostnamectl | grep -w 'Hardware Model')
 
-      if [[ -n "$vendor_info" && -n "$model_info" ]]; then
-          # Extract vendor and model using 'awk' for a cleaner approach.
-          local vendor=$(echo "$vendor_info" | awk -F ': ' '{print $2}' | xargs)
-          local model_name=$(echo "$model_info" | awk -F ': ' '{print $2}' | xargs)
-          local device_model="$vendor $model_name"
+          if [[ -n "$vendor_info" && -n "$model_info" ]]; then
+              # Extract vendor and model using 'awk' for a cleaner approach.
+              local vendor=$(echo "$vendor_info" | awk -F ': ' '{print $2}' | xargs)
+              local model_name=$(echo "$model_info" | awk -F ': ' '{print $2}' | xargs)
+              local device_model="$vendor $model_name"
 
-          echo "DEVICE_MODEL=$device_model"
-          echo "DEVICE_MODEL=$device_model" > "$env_file"
-          echo "GPU_LIST=$gpu_list" >> "$env_file"
-      fi
+              echo "DEVICE_MODEL=$device_model"
+              echo "DEVICE_MODEL=$device_model" > "$env_file"
+              echo "GPU_LIST=$gpu_list" >> "$env_file"
+          fi
     else
           if ["$device_type" == "raspberrypi"]
               device_model=$(grep -w "Model" /proc/cpuinfo 2>/dev/null | awk -F':' '{print $2}' | xargs)
