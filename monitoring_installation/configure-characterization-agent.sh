@@ -70,6 +70,7 @@ function store_char_agent_envs() {
           device_model=$(echo "$device_model" | sed -E 's/ ?[0-9]+$//')
     fi
     if [[ "$device_type" == "jetson" ]]; then
+          pip3 install -U jetson-stats
           device_model=$(tr -d '\0' < /proc/device-tree/model)
           device_model=${device_model//Developer Kit/}
     fi
