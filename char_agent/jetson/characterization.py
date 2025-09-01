@@ -15,6 +15,8 @@ import logging
 import ast
 import pandas as pd
 from dotenv import load_dotenv
+from jtop import jtop
+
 load_dotenv("/characterization-agent/.env")
 import time
 logging.basicConfig(level=logging.INFO)
@@ -128,7 +130,7 @@ def get_host_type():
     return node_class
 
 
-def device_model(arch):
+def device_model():
     model = os.getenv("DEVICE_MODEL")
     return model
 
@@ -175,7 +177,7 @@ def get_gpu_model(arch):
     return result
 
 
-def get_cpu():
+def get_cpu(model):
     CPUinfo = cpuinfo.get_cpu_info()
     brand = CPUinfo.get('brand_raw')
     CPUarch = platform.machine()
@@ -185,10 +187,13 @@ def get_cpu():
     items = os.listdir(home)
     logging.info(items)
     # Define column names
-    columns = ["Date","CPU Utilization","Total Power","CPU Power","GPU Power"]
-    # Read the CSV file with specified column names
-    df = pd.read_csv(home+'/output.csv', header=None, names=columns)
-    energy_value = df['CPU Power'].iloc[0]
+    if "Jetson" in model:
+        with jtop() as jetson:
+            #jetson.ok() will provide the proper update frequency
+            if jetson.ok():
+                # Read tegra stats
+                energy_in_mw = jetson.stats.get("Power POM_5V_CPU")
+                energy_value = int(energy_in_mw)/1000
     cpu = {"CPU": {"model": brand, "Arch": CPUarch, "bits": CPUbits, "cores": CPUcores, "energy_watt": energy_value}}
     logging.info(cpu)
     return cpu

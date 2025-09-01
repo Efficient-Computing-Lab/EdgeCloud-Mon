@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: char-agent
+  namespace: monitoring
+  labels:
+    app: char-agent
+spec:
+  selector:
+    matchLabels:
+      app: char-agent
+  template:
+    metadata:
+      labels:
+        app: char-agent
+    spec:
+      hostNetwork: true
+      containers:
+        - name: char-agent
+          image: gkorod/char-agent:v1.2-jetson
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - containerPort: 5001
+              name: char-agent
+          volumeMounts:
+            - name: env-file
+              mountPath: /characterization-agent/.env
+              readOnly: true
+            - name: jtop-sock
+              mountPath: /run/jtop.sock
+      volumes:
+        - name: env-file
+          hostPath:
+            path: /opt/char-agent/.env
+            type: File
+        - name: jtop-sock
+          hostPath:
+            path: /run/jtop.sock
+            type: Socket
+      imagePullSecrets:
+        - name: charagent

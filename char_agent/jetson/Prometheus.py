@@ -5,7 +5,7 @@ from prometheus_client.metrics_core import GaugeMetricFamily
 import characterization
 import os
 import logging
-
+import platform
 
 
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +45,8 @@ class CustomCollector(object):
         latitude = region.get('latitude')
         longitude = region.get('longitude')
         char_node_disk = characterization.get_disk()
-        char_node_cpu = characterization.get_cpu()
+        device_model = characterization.device_model()
+        char_node_cpu = characterization.get_cpu(device_model)
         cpu = char_node_cpu.get('CPU')
         brand = cpu.get('model')
         CPUarch = cpu.get('Arch')
@@ -57,7 +58,7 @@ class CustomCollector(object):
         char_os = char_node_os.get('OS')
         os_name = char_os.get('OS_name')
         os_version = char_os.get('OS_version')
-        device_model = characterization.device_model(CPUarch)
+
         #if 'arm' in CPUarch:
         #    char_node_class = 'RPi'
         if 'with' in brand or 'arm' in CPUarch:
@@ -166,12 +167,8 @@ if __name__ == '__main__':
     start_http_server(5001)
     # Define the path to your shell script
     home = os.getcwd()
-    script_path = home+'/run-powerjoular.sh'
-    # Run the shell script
-    subprocess.run([script_path], shell=True)
-    while not os.path.exists(home+'/output.csv'):
-        # Wait for a short time before checking again
-        time.sleep(1)
+    model = os.getenv("DEVICE_MODEL")
+
     REGISTRY.register(CustomCollector())
     while True:
         time.sleep(5)
