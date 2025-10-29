@@ -1,1 +1,12 @@
-{"architecture": "amd64", "bootID": "2ed04db6-a80f-4750-bd1d-61dbd183019f", "containerRuntimeVersion": "containerd://1.6.8-k3s1", "kernelVersion": "6.8.0-78-generic", "kubeProxyVersion": "v1.25.4+k3s1", "kubeletVersion": "v1.25.4+k3s1", "machineID": "ac118c3feee842b0b89f281730508368", "operatingSystem": "linux", "osImage": "Linux Mint 22", "systemUUID": "a050b308-604b-11ef-a4f7-40c2ba7ce5e4"}
+{
+  "architecture": "amd64",
+  "bootID": "1c2bf134-02aa-4b3b-8b5b-62afbf90cfcc",
+  "containerRuntimeVersion": "containerd://1.7.13",
+  "kernelVersion": "6.8.0-86-generic",
+  "kubeProxyVersion": "v1.29.2",
+  "kubeletVersion": "v1.29.2",
+  "machineID": "340f8b3f3b7f4643b5be8378fe233f12",
+  "operatingSystem": "linux",
+  "osImage": "Debian GNU/Linux 12 (bookworm)",
+  "systemUUID": "d0ad8b76-7417-45e2-9fa5-16b4298138e0"
+}

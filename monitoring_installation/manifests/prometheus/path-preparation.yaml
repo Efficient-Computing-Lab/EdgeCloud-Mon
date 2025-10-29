@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-prometheus-dir
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      nodeSelector:
+        monitoringMaster: "true"
+      hostPID: true
+      restartPolicy: OnFailure
+      containers:
+      - name: mkdir
+        image: busybox
+        command:
+          - /bin/sh
+          - -c
+          - "mkdir -p /host/opt/Prometheus/prometheus && chmod 777 /host/opt/Prometheus/prometheus"
+        volumeMounts:
+        - name: host
+          mountPath: /host
+      volumes:
+      - name: host
+        hostPath:
+          path: /

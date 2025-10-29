@@ -24,17 +24,50 @@ create_storage_path() {
 
 # 3️⃣ Add label to master node
 add_label() {
-    # Get master node name
-    master_node_json=$(kubectl get node --selector='node-role.kubernetes.io/master' -o json)
-    name=$(echo "$master_node_json" | jq -r '.items[0].metadata.labels["kubernetes.io/hostname"]')
+    echo "🔍 Fetching available Kubernetes nodes..."
+    nodes=($(kubectl get nodes -o jsonpath='{.items[*].metadata.name}'))
+
+    if [[ ${#nodes[@]} -eq 0 ]]; then
+        echo "❌ No Kubernetes nodes found."
+        return 1
+    fi
+
+    echo ""
+    echo "📋 Available nodes:"
+    i=1
+    for n in "${nodes[@]}"; do
+        echo "  [$i] $n"
+        ((i++))
+    done
+    echo ""
+
+    # Ask the user to pick one
+    read -rp "👉 Enter the number of the node to label as monitoringMaster: " choice
+
+    # Validate input
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#nodes[@]} )); then
+        echo "❌ Invalid selection."
+        return 1
+    fi
+
+    name="${nodes[$((choice-1))]}"
+
+    echo "🧩 You selected: $name"
+
+    # Get detailed node info
+    node_json=$(kubectl get node "$name" -o json)
 
     # Save nodeInfo.json
-    echo "$master_node_json" | jq '.items[0].status.nodeInfo' > nodeInfo.json
+    echo "$node_json" | jq '.status.nodeInfo' > nodeInfo.json
     chmod 444 nodeInfo.json
+    echo "📁 Node information saved to nodeInfo.json"
 
     # Apply label
-    kubectl label nodes "$name" monitoringMaster=true --overwrite
+    kubectl label node "$name" monitoringMaster=true --overwrite
+    echo "✅ Label 'monitoringMaster=true' applied to node: $name"
 }
+
+
 
 # 4️⃣ Run functions
 add_label
