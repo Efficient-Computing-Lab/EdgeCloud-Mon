@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-external-service
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus
+    prometheus: k8s
+  ports:
+    - protocol: TCP
+      port: 80            # internal service port
+      targetPort: 9090    # container port
+      nodePort: 30190     # external port (optional, Kubernetes will assign one if omitted)
+  type: NodePort

@@ -9,7 +9,7 @@ import string
 import subprocess
 import time
 from pathlib import Path
-
+import yaml
 
 import YAMLwriter
 import KubernetesInfo
@@ -75,6 +75,20 @@ def workers(names):
         print(name)
         subprocess.call(['kubectl label node ' + name + ' node-role.kubernetes.io/worker=worker'], shell=True)
 
+def configure_blackbox(node_labels):
+    for node in node_labels:
+        for k, v in node.items():
+            if "monitoring" in k:
+                app_label = "blackbox-exporter-master"
+                YAMLwriter.blackbox_deployment(app_label, "monitoringMaster", node.get("monitoringMaster"))
+            if "worker" in k:
+                app_label = "blackbox-exporter-worker-"+node.get("worker")
+                YAMLwriter.blackbox_deployment(app_label,"worker",node.get("worker"))
+            YAMLwriter.blackbox_service(app_label)
+            YAMLwriter.blackbox_servicemonitor(app_label)
+    subprocess.call(['kubectl apply -f manifests/blackbox/'], shell=True)
+
+
 
 answer1 = kernel_question()
 if answer1:
@@ -83,6 +97,7 @@ if answer1:
     YAMLwriter.prometheus_kubeControllerManager_DiscoveryEndpoints(master_ip)
     YAMLwriter.prometheus_kubeControllerScheduler_DiscoveryEndpoints(master_ip)
     nodelist = KubernetesInfo.get_info()
+    node_labels = KubernetesInfo.get_labels()
     # subprocess.call(['kubectl apply -f prometheus-loadbalancer.yaml'], shell=True)
     # subprocess.call(['kubectl apply -f grafana-loadbalancer.yaml'], shell=True)
     subprocess.call(['sh', './kubectl.sh'])
@@ -93,6 +108,7 @@ if answer1:
     arch = find_arch()
     subprocess.call(['kubectl apply -f manifests/kube-state-metrics'],shell=True)
     subprocess.call(['kubectl apply -f manifests/node-exporter'],shell=True)
+    configure_blackbox(node_labels)
     kubevirt_answer = kubevirt_question()
     if kubevirt_answer:
         YAMLwriter.kubevirt_exporter(master_ip)

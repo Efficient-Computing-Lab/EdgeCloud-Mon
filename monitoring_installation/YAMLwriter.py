@@ -2,6 +2,147 @@ import yaml
 import os
 from pathlib import Path
 
+def blackbox_servicemonitor(app_label):
+    filename = app_label + "ServiceMonitor.yaml"
+    kubernetes ={
+      "apiVersion": "monitoring.coreos.com/v1",
+      "kind": "ServiceMonitor",
+      "metadata": {
+        "name": "blackbox-icmp-nodes",
+        "namespace": "monitoring",
+        "labels": {
+          "release": "prometheus"
+        }
+      },
+      "spec": {
+        "selector": {
+          "matchLabels": {
+            "app": app_label
+          }
+        },
+        "namespaceSelector": {
+          "matchNames": [
+            "monitoring"
+          ]
+        },
+        "endpoints": [
+          {
+            "port": "http",
+            "path": "/probe",
+            "interval": "30s",
+            "params": {
+              "module": [
+                "icmp"
+              ]
+            }
+          }
+        ]
+      }
+    }
+    with open('manifests/blackbox/'+filename, 'w') as outfile:
+        yaml.dump(kubernetes, outfile, default_flow_style=False)
+
+def blackbox_service(app_label):
+    filename = app_label + "Service.yaml"
+    kubernetes = {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "name": "blackbox-exporter",
+                "namespace": "monitoring",
+                "labels": {
+                    "app": app_label
+                }
+            },
+            "spec": {
+                "clusterIP": "None",
+                "ports": [
+                    {
+                        "name": "http",
+                        "port": 9115,
+                        "targetPort": "http"
+                    }
+                ],
+                "selector": {
+                    "app": app_label
+                }
+            }
+        }
+    with open('manifests/blackbox/'+filename, 'w') as outfile:
+        yaml.dump(kubernetes, outfile, default_flow_style=False)
+
+def blackbox_deployment(app_label,nodeselector_key,nodeselector_value):
+    filename = app_label +"Deployment.yaml"
+    kubernetes ={
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "blackbox-exporter",
+        "namespace": "monitoring",
+        "labels": {
+          "app": app_label
+        }
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app": app_label
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": app_label
+            }
+          },
+          "spec": {
+            "hostNetwork": True,
+            "dnsPolicy": "ClusterFirstWithHostNet",
+            "containers": [
+              {
+                "name": "blackbox-exporter",
+                "image": "prom/blackbox-exporter:latest",
+                "nodeSelector": {
+                  "beta.kubernetes.io/os": "linux",
+                  nodeselector_key: nodeselector_value
+                },
+                "args": [
+                  "--config.file=/config/blackbox.yml"
+                ],
+                "ports": [
+                  {
+                    "containerPort": 9115,
+                    "name": "http"
+                  }
+                ],
+                "securityContext": {
+                  "capabilities": {
+                    "add": ["NET_RAW"]
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/config"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "blackbox-config"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+    with open('manifests/blackbox/'+filename, 'w') as outfile:
+        yaml.dump(kubernetes, outfile, default_flow_style=False)
 
 def characterization_agent(gpu_list, env_host_path="/opt/char-agent/.env"):
     kubernetes = {

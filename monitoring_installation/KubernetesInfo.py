@@ -72,3 +72,20 @@ def get_service_ip(service_name):
     ip = ip + ":" + str(port_number)
     print(ip)
     return ip
+
+
+def get_labels():
+    label_list = []
+    with open('nodes_labels.json') as json_file:
+        data = json.load(json_file)
+        for record in data:
+            node_name = record.get('name')
+            labels = record.get('labels')
+            for k, v in labels.items():
+                if "worker" in k:
+                    dict = {"node_name": node_name, k:v}
+                    label_list.append(dict)
+                if "monitoring" in k:
+                    dict = {"node_name": node_name, k:v}
+                    label_list.append(dict)
+    return label_list

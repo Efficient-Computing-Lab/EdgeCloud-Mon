@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus
+    prometheus: k8s
+  ports:
+    - protocol: TCP
+      port: 80          # Port inside cluster
+      targetPort: 9090  # Prometheus container port

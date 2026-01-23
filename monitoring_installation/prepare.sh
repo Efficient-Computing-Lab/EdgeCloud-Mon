@@ -4,7 +4,6 @@ set -e  # exit on error
 
 cwd=$(pwd)
 
-
 update-pciids
 
 # 2️⃣ Create Prometheus storage path and apply PV
@@ -22,7 +21,7 @@ create_storage_path() {
     fi
 }
 
-# 3️⃣ Add label to master node
+# 3️⃣ Add labels to master and worker nodes
 add_label() {
     echo "🔍 Fetching available Kubernetes nodes..."
     nodes=($(kubectl get nodes -o jsonpath='{.items[*].metadata.name}'))
@@ -50,26 +49,45 @@ add_label() {
         return 1
     fi
 
-    name="${nodes[$((choice-1))]}"
+    master="${nodes[$((choice-1))]}"
+    echo "🧩 You selected: $master"
 
-    echo "🧩 You selected: $name"
-
-    # Get detailed node info
-    node_json=$(kubectl get node "$name" -o json)
-
-    # Save nodeInfo.json
+    # Save master node info
+    node_json=$(kubectl get node "$master" -o json)
     echo "$node_json" | jq '.status.nodeInfo' > nodeInfo.json
     chmod 444 nodeInfo.json
     echo "📁 Node information saved to nodeInfo.json"
 
-    # Apply label
-    kubectl label node "$name" monitoringMaster=true --overwrite
-    echo "✅ Label 'monitoringMaster=true' applied to node: $name"
+    # Apply label to master
+    kubectl label node "$master" monitoringMaster=true --overwrite
+    echo "✅ Label 'monitoringMaster=true' applied to node: $master"
+
+    # Apply labels to worker nodes
+    echo ""
+    echo "🔖 Labeling worker nodes..."
+    worker_index=1
+    for n in "${nodes[@]}"; do
+        if [[ "$n" != "$master" ]]; then
+            kubectl label node "$n" worker=$worker_index --overwrite
+            echo "✅ Label 'worker=$worker_index' applied to node: $n"
+            ((worker_index++))
+        fi
+    done
+
+    echo ""
+    echo "🎉 All nodes labeled successfully!"
 }
 
-
+# 5️⃣ List nodes with their labels as a valid JSON array
+list_nodes_json() {
+    echo "📦 Listing all nodes with their labels in JSON..."
+    kubectl get nodes -o json | jq '[.items[] | {name: .metadata.name, labels: .metadata.labels}]' > nodes_labels.json
+    chmod 444 nodes_labels.json
+    echo "📁 Saved node labels to nodes_labels.json"
+}
 
 # 4️⃣ Run functions
 add_label
 kubectl create namespace monitoring || true
 create_storage_path "/opt"
+list_nodes_json
