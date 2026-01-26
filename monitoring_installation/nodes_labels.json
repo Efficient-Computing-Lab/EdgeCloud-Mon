@@ -1,19 +1,5 @@
 [
   {
-    "name": "jetson-desktop",
-    "labels": {
-      "beta.kubernetes.io/arch": "arm64",
-      "beta.kubernetes.io/instance-type": "k3s",
-      "beta.kubernetes.io/os": "linux",
-      "egress.k3s.io/cluster": "true",
-      "kubernetes.io/arch": "arm64",
-      "kubernetes.io/hostname": "jetson-desktop",
-      "kubernetes.io/os": "linux",
-      "node.kubernetes.io/instance-type": "k3s",
-      "worker": "1"
-    }
-  },
-  {
     "name": "prof-laptop",
     "labels": {
       "beta.kubernetes.io/arch": "amd64",
@@ -27,6 +13,20 @@
       "node-role.kubernetes.io/control-plane": "true",
       "node-role.kubernetes.io/master": "true",
       "node.kubernetes.io/instance-type": "k3s"
+    }
+  },
+  {
+    "name": "jetson-desktop",
+    "labels": {
+      "beta.kubernetes.io/arch": "arm64",
+      "beta.kubernetes.io/instance-type": "k3s",
+      "beta.kubernetes.io/os": "linux",
+      "egress.k3s.io/cluster": "true",
+      "kubernetes.io/arch": "arm64",
+      "kubernetes.io/hostname": "jetson-desktop",
+      "kubernetes.io/os": "linux",
+      "node.kubernetes.io/instance-type": "k3s",
+      "worker": "1"
     }
   }
 ]

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: blackbox-exporter-master
+  name: blackbox-exporter-master
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blackbox-exporter-master
+  template:
+    metadata:
+      labels:
+        app: blackbox-exporter-master
+    spec:
+      containers:
+      - args:
+        - --config.file=/config/blackbox.yml
+        image: prom/blackbox-exporter:latest
+        name: blackbox-exporter
+        ports:
+        - containerPort: 9115
+          name: http
+        securityContext:
+          capabilities:
+            add:
+            - NET_RAW
+        volumeMounts:
+        - mountPath: /config
+          name: config
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+        monitoringMaster: 'true'
+      volumes:
+      - configMap:
+          name: blackbox-config
+        name: config

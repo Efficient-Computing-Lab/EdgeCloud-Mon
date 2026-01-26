@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blackbox-exporter-worker-1
+  name: blackbox-exporter-worker-service1
+  namespace: monitoring
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 9115
+    targetPort: http
+  selector:
+    app: blackbox-exporter-worker-1

@@ -75,17 +75,26 @@ def workers(names):
         print(name)
         subprocess.call(['kubectl label node ' + name + ' node-role.kubernetes.io/worker=worker'], shell=True)
 
-def configure_blackbox(node_labels):
+def configure_blackbox(node_labels,nodelist):
     for node in node_labels:
-        for k, v in node.items():
-            if "monitoring" in k:
-                app_label = "blackbox-exporter-master"
-                YAMLwriter.blackbox_deployment(app_label, "monitoringMaster", node.get("monitoringMaster"))
-            if "worker" in k:
-                app_label = "blackbox-exporter-worker-"+node.get("worker")
-                YAMLwriter.blackbox_deployment(app_label,"worker",node.get("worker"))
-            YAMLwriter.blackbox_service(app_label)
-            YAMLwriter.blackbox_servicemonitor(app_label)
+        node_name = node.get("node_name")
+        for node_record in nodelist:
+            ip = node_record.get_ip()
+            for k, v in node.items():
+                    if "monitoring" in k:
+                        app_label = "blackbox-exporter-master"
+                        servicemonitor_name = "blackbox-icmp-nodes-master"
+                        service_name = "blackbox-exporter-master-service"
+                        YAMLwriter.blackbox_deployment(app_label, "monitoringMaster", node.get("monitoringMaster"))
+                        YAMLwriter.blackbox_service(app_label,service_name)
+                        YAMLwriter.blackbox_servicemonitor(app_label,ip,servicemonitor_name)
+                    if "worker" in k:
+                        app_label = "blackbox-exporter-worker-"+node.get("worker")
+                        servicemonitor_name = "blackbox-icmp-nodes-worker-"+node.get("worker")
+                        service_name = "blackbox-exporter-worker-service"+node.get("worker")
+                        YAMLwriter.blackbox_deployment(app_label,"worker",node.get("worker"))
+                        YAMLwriter.blackbox_service(app_label,service_name)
+                        YAMLwriter.blackbox_servicemonitor(app_label,ip,servicemonitor_name)
     subprocess.call(['kubectl apply -f manifests/blackbox/'], shell=True)
 
 
@@ -108,7 +117,7 @@ if answer1:
     arch = find_arch()
     subprocess.call(['kubectl apply -f manifests/kube-state-metrics'],shell=True)
     subprocess.call(['kubectl apply -f manifests/node-exporter'],shell=True)
-    configure_blackbox(node_labels)
+    configure_blackbox(node_labels,nodelist)
     kubevirt_answer = kubevirt_question()
     if kubevirt_answer:
         YAMLwriter.kubevirt_exporter(master_ip)

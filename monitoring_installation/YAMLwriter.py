@@ -2,13 +2,13 @@ import yaml
 import os
 from pathlib import Path
 
-def blackbox_servicemonitor(app_label):
+def blackbox_servicemonitor(app_label,ip,servicemonitor_name):
     filename = app_label + "ServiceMonitor.yaml"
     kubernetes ={
       "apiVersion": "monitoring.coreos.com/v1",
       "kind": "ServiceMonitor",
       "metadata": {
-        "name": "blackbox-icmp-nodes",
+        "name": servicemonitor_name,
         "namespace": "monitoring",
         "labels": {
           "release": "prometheus"
@@ -34,21 +34,26 @@ def blackbox_servicemonitor(app_label):
               "module": [
                 "icmp"
               ]
-            }
+            },
+            "relabelings":[{"sourceLabels": [],"targetLabel": "__param_target","replacement":ip},
+                           {"sourceLabels": ["__param_target"], "targetLabel": "instance"},
+                           {"sourceLabels": ["__meta_kubernetes_pod_node_name"],"targetLabel": "source_node"}
+                           ]
           }
+
         ]
       }
     }
     with open('manifests/blackbox/'+filename, 'w') as outfile:
         yaml.dump(kubernetes, outfile, default_flow_style=False)
 
-def blackbox_service(app_label):
+def blackbox_service(app_label,service_name):
     filename = app_label + "Service.yaml"
     kubernetes = {
             "apiVersion": "v1",
             "kind": "Service",
             "metadata": {
-                "name": "blackbox-exporter",
+                "name": service_name,
                 "namespace": "monitoring",
                 "labels": {
                     "app": app_label
@@ -72,76 +77,78 @@ def blackbox_service(app_label):
         yaml.dump(kubernetes, outfile, default_flow_style=False)
 
 def blackbox_deployment(app_label,nodeselector_key,nodeselector_value):
-    filename = app_label +"Deployment.yaml"
-    kubernetes ={
-      "apiVersion": "apps/v1",
-      "kind": "Deployment",
-      "metadata": {
-        "name": "blackbox-exporter",
-        "namespace": "monitoring",
-        "labels": {
-          "app": app_label
-        }
-      },
-      "spec": {
-        "replicas": 1,
-        "selector": {
-          "matchLabels": {
-            "app": app_label
-          }
-        },
-        "template": {
-          "metadata": {
+    filename = app_label + "Deployment.yaml"
+
+    kubernetes = {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+            "name": app_label,
+            "namespace": "monitoring",
             "labels": {
-              "app": app_label
+                "app": app_label
             }
-          },
-          "spec": {
-            "hostNetwork": True,
-            "dnsPolicy": "ClusterFirstWithHostNet",
-            "containers": [
-              {
-                "name": "blackbox-exporter",
-                "image": "prom/blackbox-exporter:latest",
-                "nodeSelector": {
-                  "beta.kubernetes.io/os": "linux",
-                  nodeselector_key: nodeselector_value
-                },
-                "args": [
-                  "--config.file=/config/blackbox.yml"
-                ],
-                "ports": [
-                  {
-                    "containerPort": 9115,
-                    "name": "http"
-                  }
-                ],
-                "securityContext": {
-                  "capabilities": {
-                    "add": ["NET_RAW"]
-                  }
-                },
-                "volumeMounts": [
-                  {
-                    "name": "config",
-                    "mountPath": "/config"
-                  }
-                ]
-              }
-            ],
-            "volumes": [
-              {
-                "name": "config",
-                "configMap": {
-                  "name": "blackbox-config"
+        },
+        "spec": {
+            "replicas": 1,
+            "selector": {
+                "matchLabels": {
+                    "app": app_label
                 }
-              }
-            ]
-          }
+            },
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "app": app_label
+                    }
+                },
+                "spec": {
+                    "hostNetwork": True,
+                    "dnsPolicy": "ClusterFirstWithHostNet",
+                    "nodeSelector": {  # <-- Moved here
+                        "beta.kubernetes.io/os": "linux",
+                        nodeselector_key: nodeselector_value
+                    },
+                    "containers": [
+                        {
+                            "name": "blackbox-exporter",
+                            "image": "prom/blackbox-exporter:latest",
+                            "args": [
+                                "--config.file=/config/blackbox.yml"
+                            ],
+                            "ports": [
+                                {
+                                    "containerPort": 9115,
+                                    "name": "http"
+                                }
+                            ],
+                            "securityContext": {
+                                "capabilities": {
+                                    "add": ["NET_RAW"]
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "name": "config",
+                                    "mountPath": "/config"
+                                }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "config",
+                            "configMap": {
+                                "name": "blackbox-config"
+                            }
+                        }
+                    ]
+                }
+            }
         }
-      }
     }
-    with open('manifests/blackbox/'+filename, 'w') as outfile:
+
+    with open('manifests/blackbox/' + filename, 'w') as outfile:
         yaml.dump(kubernetes, outfile, default_flow_style=False)
 
 def characterization_agent(gpu_list, env_host_path="/opt/char-agent/.env"):
